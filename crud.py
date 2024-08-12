@@ -6,66 +6,83 @@ conexao = mysql.connector.connect(
     user = 'root',
     password = 'vitor',
     database = 'bdcrud.py',
-
 )
+
 cursor = conexao.cursor()
 
 #create
 def add_produto(nome_produto, valor):
-    cursor = conexao.cursor()
-
-    nome_produto = input('Digite o nonme do produto: ')
-    valor = input(f'digite o valor do {nome_produto}: ')
-    comando = (f'INSERT INTO vendas (nome_produto, valor) VALUES (?, ?)' , (nome_produto, valor))
-    cursor.execute(comando)
+    comando = 'INSERT INTO vendas (nome_produto, valor) VALUES (%s, %s)'
+    cursor.execute(comando, (nome_produto, valor))
     conexao.commit()
-    conexao.close()
     print('Produto cadastrado com sucesso!!')
 
 
 #read
 def read_produto():
-    cursor = conexao.cursor()
-
-    comando = f'SELECT * FROM vendas;'
+    comando = 'SELECT * FROM vendas;'
     cursor.execute(comando)
     resultado = cursor.fetchall()
-    conexao.close()
-    print('produtos: ')
-    for produtos in resultado:
-        print(resultado)
+    print('Produtos: ')
+    for produto in resultado:
+        print(produto)
     print()
 
 #update
-def update_produtos(nome_produto):
-    cursor = conexao.cursor()
+def update_produtos(nome_produto, valor):
+    comando = 'UPDATE vendas SET valor = %s WHERE nome_produto = %s'
 
-    produto_find = input('Digite o nome do produto que será atualizado: ')
-    if(produto_find == nome_produto):
-        novo_valor = input(f'Digite o novo valor do(a) {produto_find}: ')
-        comando = f'UPDATE vendas SET valor = {novo_valor} WHERE nome_produto = "{produto_find}"'
-
-    else:
-        ('produto não encontrado')
-
-    cursor.execute(comando)
+    cursor.execute(comando, (valor, nome_produto))
     conexao.commit()
-    conexao.close()
-
-#rever o código
+    print("Preço do produto atualizado com sucesso!\n")
 
 
 #delete
-def deleatar_produtos():
-    cursor = conexao.cursor()
+def deleatar_produtos(nome_produto):
+    comando = ('DELETE FROM vendas WHERE nome_produto = %s')
 
-    delete_produtos = input('Qual produto deseja deletar? ')
-    comando = f'DELETE FROM vendas WHERE nome_produto = "{delete_produtos}"'
-
-    cursor.execute(comando)
+    cursor.execute(comando, (nome_produto,))
     conexao.commit()
-    conexao.close()
 
+def menu():
+    print("Escolha uma opção: ")
+    print("1. Cadastrar um produto: ")
+    print("2. Imprimir produtos: ")
+    print("3. Atualizar um produto: ")
+    print("4. Deletar um produto: ")
+    print("5. Fechar Menu ")
+
+def main():
+    while True:
+        menu()
+        escolha = input('Escolha uma opção de 1-5:\n')
+        
+        match escolha:
+            case '1':
+                 nome_produto = input('Digite o nome do produto: ')
+                 valor = int(input(f'Digite o valor do {nome_produto}: '))
+                 add_produto(nome_produto, valor)
+            
+            case '2':
+                read_produto()
+            
+            case '3':
+                nome_produto = input('Digite o nome do produto que deseja mudar o valor: ')
+                valor = int(input('Digite o novo valor: '))
+                update_produtos(nome_produto, valor)
+
+            case '4':
+                nome_produto = input('Digite o nome do produto irá ser deletado: ')
+                deleatar_produtos(nome_produto)
+
+            case '5':
+                print('fechando...')
+                break
+
+            case _:
+                print('Opção Invalida,  tente um numero de 1 a 5')
+
+main()
 cursor.close()
 conexao.close()
 
